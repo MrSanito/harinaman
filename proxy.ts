@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
+  /*
   const session = request.cookies.get("session")?.value;
   const { pathname } = request.nextUrl;
 
@@ -20,6 +21,7 @@ export function proxy(request: NextRequest) {
     // Redirect to dashboard if logged in and trying to visit login page
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
+  */
 
   return NextResponse.next();
 }
