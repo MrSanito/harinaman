@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -18,70 +18,49 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
+const defaultMockUser: User = {
+  id: "dummy-admin-id",
+  email: "admin@example.com",
+  name: "Admin User",
+  role: "Admin",
+  number: "9876543210",
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Start with mock user directly so they are logged in by default
+  const [user, setUser] = useState<User | null>(defaultMockUser);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const checkUserSession = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.user) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
-      console.error("Failed to fetch user session:", err);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    checkUserSession();
-  }, []);
-
   const login = async (email: string, password: string) => {
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setUser(data.user);
-        router.push("/dashboard");
-        router.refresh();
-        return { success: true };
-      } else {
-        return { success: false, error: data.error || "Invalid credentials" };
-      }
-    } catch (err) {
-      return { success: false, error: "An unexpected error occurred" };
-    }
+    setIsLoading(true);
+    // Simulate short loading to mimic API call
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    const mockUser: User = {
+      id: "dummy-admin-id",
+      email: email || "admin@example.com",
+      name: email.split("@")[0] || "Admin User",
+      role: "Admin",
+      number: "9876543210",
+    };
+    
+    setUser(mockUser);
+    setIsLoading(false);
+    router.push("/dashboard");
+    router.refresh();
+    return { success: true };
   };
 
   const logout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      setUser(null);
-      router.push("/login");
-      router.refresh();
-    }
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    setUser(null);
+    setIsLoading(false);
+    router.push("/login");
+    router.refresh();
   };
 
   return (
