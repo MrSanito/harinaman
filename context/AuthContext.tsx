@@ -18,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateProfile: (name: string, number: string, address: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string, name: string, number: string, address: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -106,8 +107,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const register = async (email: string, password: string, name: string, number: string, address: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, number, address }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUser(data.user);
+        router.push("/dashboard");
+        router.refresh();
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || "Failed to register" };
+      }
+    } catch (err) {
+      return { success: false, error: "Network error. Please try again." };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, updateProfile, register }}>
       {children}
     </AuthContext.Provider>
   );

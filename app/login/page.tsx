@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 export default function LoginPage() {
   const { login, isLoading: authLoading } = useAuth();
@@ -139,6 +140,13 @@ export default function LoginPage() {
                 </button>
               </div>
             </form>
+
+            <div className="mt-6 text-center text-xs font-bold text-stone-500">
+              નવા ગ્રાહક છો?{" "}
+              <Link href="/register" className="text-green-dark hover:underline font-black">
+                નોંધણી કરો (Sign Up)
+              </Link>
+            </div>
 
             {/* Quick Test Credentials - Styled in Orange Accent */}
             <div className="mt-6 pt-5 border-t border-zinc-100">
