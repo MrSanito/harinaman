@@ -35,6 +35,38 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Checkout info states
+  const [checkoutName, setCheckoutName] = useState("");
+  const [checkoutPhone, setCheckoutPhone] = useState("");
+  const [checkoutAddress, setCheckoutAddress] = useState("");
+
+  // Sync session and localStorage details
+  useEffect(() => {
+    if (user) {
+      setCheckoutName(user.name || "");
+      setCheckoutPhone(user.number || "");
+      setCheckoutAddress(user.address || "");
+    } else {
+      setCheckoutName(typeof window !== "undefined" ? localStorage.getItem("harinaman_name") || "" : "");
+      setCheckoutPhone(typeof window !== "undefined" ? localStorage.getItem("harinaman_phone") || "" : "");
+      setCheckoutAddress(typeof window !== "undefined" ? localStorage.getItem("harinaman_address") || "" : "");
+    }
+  }, [user]);
+
+  // Persist guest details dynamically
+  const handleCheckoutDetailsChange = (field: "name" | "phone" | "address", val: string) => {
+    if (field === "name") {
+      setCheckoutName(val);
+      localStorage.setItem("harinaman_name", val);
+    } else if (field === "phone") {
+      setCheckoutPhone(val);
+      localStorage.setItem("harinaman_phone", val);
+    } else if (field === "address") {
+      setCheckoutAddress(val);
+      localStorage.setItem("harinaman_address", val);
+    }
+  };
+
   // Auto-hide toast after 2 seconds
   useEffect(() => {
     if (toastMessage) {
@@ -43,456 +75,26 @@ export default function Home() {
     }
   }, [toastMessage]);
 
-  const products: Product[] = [
-    {
-      id: "veg_potato",
-      nameEn: "Potato",
-      nameGu: "બટાકા",
-      category: "Vegetable",
-      prices: { "250g": 10, "500g": 20, "1kg": 30 },
-      svgType: "potato",
-      imageUrl: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=300&q=80",
-    },
-    {
-      id: "veg_onion",
-      nameEn: "Onion",
-      nameGu: "ડુંગળી",
-      category: "Vegetable",
-      prices: { "250g": 15, "500g": 25, "1kg": 40 },
-      svgType: "onion",
-      imageUrl: "https://images.unsplash.com/photo-1508747703725-719777637510?w=300&q=80",
-    },
-    {
-      id: "veg_locker_potato",
-      nameEn: "Locker Potato",
-      nameGu: "લોકર બટાકા",
-      category: "Vegetable",
-      prices: { "250g": 15, "500g": 25, "1kg": 45 },
-      svgType: "potato",
-      imageUrl: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=300&q=80",
-    },
-    {
-      id: "veg_brinjal",
-      nameEn: "Brinjal",
-      nameGu: "રીંગણ",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 30, "1kg": 50 },
-      svgType: "brinjal",
-      imageUrl: "https://images.unsplash.com/photo-1613743983303-b3e89f8a2b80?w=300&q=80",
-    },
-    {
-      id: "veg_tomatoes",
-      nameEn: "Tomatoes",
-      nameGu: "ટામેટા",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 40, "1kg": 80 },
-      svgType: "tomato",
-      imageUrl: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=300&q=80",
-    },
-    {
-      id: "veg_cabbage",
-      nameEn: "Cabbage",
-      nameGu: "કોબીજ",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 40, "1kg": 80 },
-      svgType: "cabbage",
-      imageUrl: "https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=300&q=80",
-    },
-    {
-      id: "veg_cauliflower",
-      nameEn: "Cauliflower",
-      nameGu: "ફુલાવર",
-      category: "Vegetable",
-      prices: { "250g": 40, "500g": 75, "1kg": 130 },
-      svgType: "cauliflower",
-      imageUrl: "https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=300&q=80",
-    },
-    {
-      id: "veg_bottle_gourd",
-      nameEn: "Bottle Gourd",
-      nameGu: "દૂધી",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 30, "1kg": 50 },
-      svgType: "gourd",
-      imageUrl: "https://images.unsplash.com/photo-1596887235673-50baf80e6b2b?w=300&q=80",
-    },
-    {
-      id: "veg_luffa_gourd",
-      nameEn: "Luffa Gourd",
-      nameGu: "ગલકા",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 30, "1kg": 55 },
-      svgType: "gourd",
-    },
-    {
-      id: "veg_bitter_gourd",
-      nameEn: "Bitter Gourd",
-      nameGu: "કારેલા",
-      category: "Vegetable",
-      prices: { "250g": 35, "500g": 65, "1kg": 110 },
-      svgType: "bittergourd",
-    },
-    {
-      id: "veg_lady_finger",
-      nameEn: "Lady Finger",
-      nameGu: "ભીંડા",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 40, "1kg": 75 },
-      svgType: "bean",
-      imageUrl: "https://images.unsplash.com/photo-1521115713617-3e6bf0f2ff19?w=300&q=80",
-    },
-    {
-      id: "veg_pointed_gourd",
-      nameEn: "Pointed Gourd",
-      nameGu: "પરવર",
-      category: "Vegetable",
-      prices: { "250g": 30, "500g": 60, "1kg": 100 },
-      svgType: "gourd",
-    },
-    {
-      id: "veg_peas",
-      nameEn: "Peas",
-      nameGu: "વટાણા",
-      category: "Vegetable",
-      prices: { "250g": 50, "500g": 90, "1kg": 160 },
-      svgType: "peas",
-      imageUrl: "https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=300&q=80",
-    },
-    {
-      id: "veg_ivy_gourd",
-      nameEn: "Ivy Gourd",
-      nameGu: "ટીંડોળા",
-      category: "Vegetable",
-      prices: { "250g": 30, "500g": 55, "1kg": 100 },
-      svgType: "gourd",
-    },
-    {
-      id: "veg_pigeon_peas",
-      nameEn: "Pigeon Peas",
-      nameGu: "તુવેર",
-      category: "Vegetable",
-      prices: { "250g": 50, "500g": 90, "1kg": 150 },
-      svgType: "peas",
-    },
-    {
-      id: "veg_cluster_beans",
-      nameEn: "Cluster Beans",
-      nameGu: "ગુવાર",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 45, "1kg": 85 },
-      svgType: "bean",
-    },
-    {
-      id: "veg_flat_beans",
-      nameEn: "Flat Beans",
-      nameGu: "વાલોર પાપડી",
-      category: "Vegetable",
-      prices: { "250g": 45, "500g": 80, "1kg": 150 },
-      svgType: "bean",
-    },
-    {
-      id: "veg_green_bean",
-      nameEn: "Green Bean",
-      nameGu: "ચોળી",
-      category: "Vegetable",
-      prices: { "250g": 45, "500g": 80, "1kg": 150 },
-      svgType: "bean",
-    },
-    {
-      id: "veg_carrot",
-      nameEn: "Carrot",
-      nameGu: "ગાજર",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 35, "1kg": 55 },
-      svgType: "carrot",
-      imageUrl: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=300&q=80",
-    },
-    {
-      id: "veg_cucumber",
-      nameEn: "Cucumber",
-      nameGu: "કાકડી",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 50, "1kg": 80 },
-      svgType: "cucumber",
-      imageUrl: "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=300&q=80",
-    },
-    {
-      id: "veg_beetroot",
-      nameEn: "Beetroot",
-      nameGu: "બીટ",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 35, "1kg": 55 },
-      svgType: "beetroot",
-    },
-    {
-      id: "veg_capsicum",
-      nameEn: "Capsicum",
-      nameGu: "શિમલા",
-      category: "Vegetable",
-      prices: { "250g": 35, "500g": 70, "1kg": 140 },
-      svgType: "pepper",
-    },
-    {
-      id: "veg_chili",
-      nameEn: "Chili",
-      nameGu: "મરચાં",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 45, "1kg": 85 },
-      svgType: "chili",
-    },
-    {
-      id: "veg_hot_chili",
-      nameEn: "Hot Chili",
-      nameGu: "તીખા મરચાં",
-      category: "Vegetable",
-      prices: { "250g": 35, "500g": 65, "1kg": 120 },
-      svgType: "chili",
-    },
-    {
-      id: "veg_ginger",
-      nameEn: "Ginger",
-      nameGu: "આદુ",
-      category: "Vegetable",
-      prices: { "250g": 50, "500g": 90, "1kg": 170 },
-      svgType: "ginger",
-      imageUrl: "https://images.unsplash.com/photo-1615485500704-8e990f9900f6?w=300&q=80",
-    },
-    {
-      id: "veg_lemon",
-      nameEn: "Lemon",
-      nameGu: "લીંબુ",
-      category: "Vegetable",
-      prices: { "250g": 40, "500g": 85, "1kg": 150 },
-      svgType: "lemon",
-    },
-    {
-      id: "leaf_coriander",
-      nameEn: "Coriander",
-      nameGu: "ધાણા",
-      category: "Leafy",
-      prices: { "250g": 30, "500g": 55, "1kg": 100 },
-      svgType: "leafy",
-      imageUrl: "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=300&q=80",
-    },
-    {
-      id: "leaf_fenugreek",
-      nameEn: "Fenugreek",
-      nameGu: "મેથી",
-      category: "Leafy",
-      prices: { "250g": 35, "500g": 65, "1kg": 120 },
-      svgType: "leafy",
-      imageUrl: "https://images.unsplash.com/photo-1603048297172-7c72a7c76f1a?w=300&q=80",
-    },
-    {
-      id: "leaf_spinach",
-      nameEn: "Spinach",
-      nameGu: "પાલક",
-      category: "Leafy",
-      prices: { "250g": 20, "500g": 35, "1kg": 60 },
-      svgType: "spinach",
-      imageUrl: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300&q=80",
-    },
-    {
-      id: "leaf_amaranth",
-      nameEn: "Amaranth Leaves",
-      nameGu: "તાંદળજાની ભાજી",
-      category: "Leafy",
-      prices: { "250g": 25, "500g": 45, "1kg": 70 },
-      svgType: "leafy",
-    },
-    {
-      id: "leaf_peppermint",
-      nameEn: "Peppermint",
-      nameGu: "ફુદીનો",
-      category: "Leafy",
-      prices: { "250g": 35, "500g": 60, "1kg": 110 },
-      svgType: "leafy",
-    },
-    {
-      id: "fv_raw_mango",
-      nameEn: "Raw Mango",
-      nameGu: "કાચી કેરી",
-      category: "Fruit/Veg",
-      prices: { "250g": 25, "500g": 45, "1kg": 80 },
-      svgType: "mango",
-      imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=300&q=80",
-    },
-    {
-      id: "veg_corn",
-      nameEn: "Corn",
-      nameGu: "મકાઈ",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 35, "1kg": 60 },
-      svgType: "corn",
-      imageUrl: "https://images.unsplash.com/photo-1601593768793-bb1c8f0c8e46?w=300&q=80",
-    },
-    {
-      id: "veg_drumstick",
-      nameEn: "Drumstick",
-      nameGu: "સરગવો",
-      category: "Vegetable",
-      prices: { "250g": 35, "500g": 60, "1kg": 110 },
-      svgType: "bean",
-    },
-    {
-      id: "leaf_spring_onion",
-      nameEn: "Spring Onion",
-      nameGu: "લીલી ડુંગળી",
-      category: "Leafy",
-      prices: { "250g": 30, "500g": 50, "1kg": 90 },
-      svgType: "onion",
-    },
-    {
-      id: "veg_elephant_yam",
-      nameEn: "Elephant Yam",
-      nameGu: "સૂરણ",
-      category: "Vegetable",
-      prices: { "250g": 30, "500g": 55, "1kg": 90 },
-      svgType: "potato",
-    },
-    {
-      id: "leaf_dill",
-      nameEn: "Dill Leaves",
-      nameGu: "સુવાની ભાજી",
-      category: "Leafy",
-      prices: { "250g": 35, "500g": 70, "1kg": 140 },
-      svgType: "leafy",
-    },
-    {
-      id: "veg_green_brinjal",
-      nameEn: "Green Brinjal",
-      nameGu: "લીલા રીંગણ",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 30, "1kg": 55 },
-      svgType: "brinjal",
-    },
-    {
-      id: "veg_french_beans",
-      nameEn: "French Beans",
-      nameGu: "ફણસી",
-      category: "Vegetable",
-      prices: { "250g": 40, "500g": 90, "1kg": 140 },
-      svgType: "bean",
-    },
-    {
-      id: "veg_ridge_gourd",
-      nameEn: "Ridge Gourd",
-      nameGu: "તુરીયા",
-      category: "Vegetable",
-      prices: { "250g": 40, "500g": 75, "1kg": 130 },
-      svgType: "gourd",
-    },
-    {
-      id: "veg_raw_banana",
-      nameEn: "Raw Banana",
-      nameGu: "કાચા કેળા",
-      category: "Vegetable",
-      prices: { "250g": 10, "500g": 25, "1kg": 40 },
-      svgType: "banana",
-    },
-    {
-      id: "veg_pumpkin",
-      nameEn: "Pumpkin",
-      nameGu: "કોળું",
-      category: "Vegetable",
-      prices: { "250g": 30, "500g": 55, "1kg": 90 },
-      svgType: "pumpkin",
-    },
-    {
-      id: "veg_garlic",
-      nameEn: "Garlic",
-      nameGu: "લસણ",
-      category: "Vegetable",
-      prices: { "250g": 60, "500g": 120, "1kg": 200 },
-      svgType: "garlic",
-    },
-    {
-      id: "leaf_lemongrass",
-      nameEn: "Lemongrass",
-      nameGu: "લીલી ચા",
-      category: "Leafy",
-      prices: { "250g": 25, "500g": 45, "1kg": 80 },
-      svgType: "leafy",
-    },
-    {
-      id: "leaf_colocasia",
-      nameEn: "Colocasia Leaves",
-      nameGu: "પતરવેલિ પાન",
-      category: "Leafy",
-      prices: { "250g": 35, "500g": 70, "1kg": 130 },
-      svgType: "leafy",
-    },
-    {
-      id: "spr_moth",
-      nameEn: "Sprouted Moth Beans",
-      nameGu: "ફણગાવેલા મઠ",
-      category: "Sprouts",
-      prices: { "250g": 30, "500g": 60, "1kg": 90 },
-      svgType: "sprouts",
-      imageUrl: "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=300&q=80",
-    },
-    {
-      id: "spr_mung",
-      nameEn: "Sprouted Mung Beans",
-      nameGu: "ફણગાવેલા મગ",
-      category: "Sprouts",
-      prices: { "250g": 30, "500g": 60, "1kg": 90 },
-      svgType: "sprouts",
-      imageUrl: "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=300&q=80",
-    },
-    {
-      id: "spr_chickpeas",
-      nameEn: "Sprouted Chickpeas",
-      nameGu: "ફણગાવેલા ચણા",
-      category: "Sprouts",
-      prices: { "250g": 30, "500g": 60, "1kg": 90 },
-      svgType: "sprouts",
-      imageUrl: "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=300&q=80",
-    },
-    {
-      id: "veg_taro_root",
-      nameEn: "Taro Root",
-      nameGu: "અળવી",
-      category: "Vegetable",
-      prices: { "250g": 25, "500g": 45, "1kg": 80 },
-      svgType: "potato",
-    },
-    {
-      id: "veg_green_garlic",
-      nameEn: "Green Garlic",
-      nameGu: "લીલું લસણ",
-      category: "Vegetable",
-      prices: { "250g": 20, "500g": 35, "1kg": 60 },
-      svgType: "garlic",
-    },
-    {
-      id: "veg_mushroom",
-      nameEn: "Mushroom",
-      nameGu: "મશરૂમ",
-      category: "Vegetable",
-      prices: { "200g_packet": 65 },
-      svgType: "mushroom",
-      imageUrl: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=300&q=80",
-    },
-    {
-      id: "dairy_cow_ghee",
-      nameEn: "Pure Cow Ghee",
-      nameGu: "શુદ્ધ ગાયનું ઘી",
-      category: "Dairy",
-      prices: { "1kg": 1200 },
-      svgType: "ghee",
-      imageUrl: "https://images.unsplash.com/photo-1631897642040-db065be6bf7d?w=300&q=80",
-    },
-    {
-      id: "dairy_buffalo_ghee",
-      nameEn: "Pure Buffalo Ghee",
-      nameGu: "શુદ્ધ ભેંસનું ઘી",
-      category: "Dairy",
-      prices: { "1kg": 1000 },
-      svgType: "ghee",
-      imageUrl: "https://images.unsplash.com/photo-1631897642040-db065be6bf7d?w=300&q=80",
-    },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
+
+  // Fetch products from database
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (data.products) {
+          setProducts(data.products);
+        }
+      } catch (err) {
+        console.error("Failed to load products:", err);
+      } finally {
+        setIsProductsLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
 
   // SVG Renderers for Products
   const renderVegSVG = (type: string, name?: string) => {
@@ -1005,14 +607,13 @@ export default function Home() {
     message += `🧾 *કુલ રકમ: ₹${getCartTotal()}*\n\n`;
     message += `🚚 *ડિલિવરી:* ઘરે ફ્રી ડિલિવરી — એક દિવસ પહેલાં ઓર્ડર આપો.\n`;
     message += `⏰ *Delivery:* Order 1 day in advance for free home delivery.\n`;
-    if (user) {
-      message += `\n👤 *ગ્રાહક વિગત:*\n`;
-      message += `   નામ: ${user.name || "ગ્રાહક"}\n`;
-      message += `   Email: ${user.email}\n`;
-      message += `   ફોન: ${user.number || "જણાવ્યું નથી"}\n`;
-    } else {
-      message += `\n📍 _WhatsApp પર ડિલિવરી સરનામું અને નામ જણાવો!_\n`;
-    }
+    
+    // Add customer and address details
+    message += `\n👤 *ગ્રાહક વિગતો / Delivery Details:*\n`;
+    message += `   નામ (Name): ${checkoutName || "જણાવ્યું નથી"}\n`;
+    message += `   ફોન (Phone): ${checkoutPhone || "જણાવ્યું નથી"}\n`;
+    message += `   સરનામું (Address): ${checkoutAddress || "જણાવ્યું નથી"}\n`;
+    
     message += `\n_Thank you for ordering from Hari Naman Greens! 🙏_`;
     return encodeURIComponent(message);
   };
@@ -1327,7 +928,12 @@ export default function Home() {
         </div>
 
         {/* Catalog Grid */}
-        {filteredProducts.length === 0 ? (
+        {isProductsLoading ? (
+          <div className="text-center py-20 bg-white border border-stone-200 rounded-[32px] flex flex-col items-center justify-center gap-4">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-green-dark"></div>
+            <p className="text-xs text-stone-500 font-semibold">ઉત્પાદનો લોડ થઈ રહ્યા છે (Loading products...)</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white border border-stone-200 rounded-[32px]">
             <svg className="h-12 w-12 text-stone-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1571,19 +1177,85 @@ export default function Home() {
                   {/* Drawer Footer summary */}
                   {cart.length > 0 && (
                     <div className="bg-stone-50 px-6 py-6 border-t border-stone-200 flex flex-col gap-4">
-                      <div className="flex justify-between text-sm font-semibold border-b border-stone-200/50 pb-3">
-                        <span className="text-stone-500">કુલ રકમ ({getCartItemsCount()} વસ્તુ)</span>
-                        <span className="text-stone-900 font-black">₹{getCartTotal()}</span>
-                      </div>
+                      
+                      {/* Enforced Authentication Gate for Checkout and Address */}
+                      {!user ? (
+                        <div className="p-4 bg-orange/5 border border-orange/20 rounded-2xl flex flex-col gap-3.5 items-center text-center">
+                          <span className="text-xl">🔒</span>
+                          <div>
+                            <h4 className="text-xs font-black text-stone-900 uppercase tracking-tight">ચેકઆઉટ પ્રતિબંધિત (Sign in to Order)</h4>
+                            <p className="text-[10px] text-stone-500 font-semibold mt-1 leading-relaxed">
+                              સરનામું દાખલ કરવા અને ઓર્ડર આપવા માટે કૃપા કરીને સાઇન ઇન કરો.
+                            </p>
+                          </div>
+                          <Link
+                            href="/login"
+                            className="w-full text-center bg-green-dark hover:bg-emerald-700 px-4 py-2.5 rounded-xl text-xs font-black text-white shadow-md transition-all active:scale-[0.97] cursor-pointer"
+                          >
+                            સાઇન ઇન (Sign in to Checkout)
+                          </Link>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Address & Details Inputs */}
+                          <div className="space-y-3.5 border-b border-stone-200/50 pb-4">
+                            <span className="text-[10px] font-black text-stone-700 uppercase tracking-wider block mb-1">
+                              🚚 ડિલિવરી વિગતો (Delivery Details)
+                            </span>
+                            
+                            <div>
+                              <label className="block text-[9px] font-black text-stone-500 uppercase">નામ (Full Name)</label>
+                              <input
+                                type="text"
+                                value={checkoutName}
+                                onChange={(e) => handleCheckoutDetailsChange("name", e.target.value)}
+                                placeholder="તમારું નામ લખો"
+                                className="mt-1 block w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-black placeholder:text-stone-400 focus:border-green-dark focus:outline-none transition-all duration-200 font-bold"
+                              />
+                            </div>
 
-                      <div className="p-3 bg-yellow/5 border border-yellow/20 rounded-xl text-[10px] text-stone-600 font-bold leading-relaxed">
-                        ⚠️ ફ્રી ઘર ડિલિવરી માટે એક દિવસ પહેલાં ઓર્ડર આપો. સવારે ડિલિવરી થાય છે.
-                      </div>
+                            <div>
+                              <label className="block text-[9px] font-black text-stone-500 uppercase">ફોન નંબર (Phone)</label>
+                              <input
+                                type="text"
+                                value={checkoutPhone}
+                                onChange={(e) => handleCheckoutDetailsChange("phone", e.target.value)}
+                                placeholder="મોબાઇલ નંબર"
+                                className="mt-1 block w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-black placeholder:text-stone-400 focus:border-green-dark focus:outline-none transition-all duration-200 font-bold"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[9px] font-black text-stone-500 uppercase">ડિલિવરી સરનામું (Address)</label>
+                              <textarea
+                                value={checkoutAddress}
+                                onChange={(e) => handleCheckoutDetailsChange("address", e.target.value)}
+                                placeholder="ઘર નંબર, સોસાયટી, લેન્ડમાર્ક, શહેર વગેરે..."
+                                rows={2}
+                                className="mt-1 block w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-black placeholder:text-stone-400 focus:border-green-dark focus:outline-none transition-all duration-200 font-bold leading-relaxed"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between text-sm font-semibold border-b border-stone-200/50 pb-3">
+                            <span className="text-stone-500">કુલ રકમ ({getCartItemsCount()} વસ્તુ)</span>
+                            <span className="text-stone-900 font-black">₹{getCartTotal()}</span>
+                          </div>
+
+                          <div className="p-3 bg-yellow/5 border border-yellow/20 rounded-xl text-[10px] text-stone-600 font-bold leading-relaxed">
+                            ⚠️ ફ્રી ઘર ડિલિવરી માટે એક દિવસ પહેલાં ઓર્ડર આપો. સવારે ડિલિવરી થાય છે.
+                          </div>
 
                       {/* Single WhatsApp Checkout Button */}
                       {!isWhatsAppPickerOpen ? (
                         <button
-                          onClick={() => setIsWhatsAppPickerOpen(true)}
+                          onClick={() => {
+                            if (!checkoutName || !checkoutPhone || !checkoutAddress) {
+                              alert("કૃપા કરીને નામ, ફોન નંબર અને સરનામું પૂર્ણ ભરો! (Please fill all fields)");
+                              return;
+                            }
+                            setIsWhatsAppPickerOpen(true);
+                          }}
                           className="w-full text-center rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-3.5 text-sm font-black text-white shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2.5 active:scale-[0.98]"
                         >
                           <svg className="h-5 w-5 fill-white shrink-0" viewBox="0 0 24 24">
@@ -1642,6 +1314,8 @@ export default function Home() {
                             </button>
                           </div>
                         </div>
+                      )}
+                        </>
                       )}
                     </div>
                   )}

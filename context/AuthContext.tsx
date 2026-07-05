@@ -9,6 +9,7 @@ interface User {
   name?: string | null;
   role?: string;
   number?: string;
+  address?: string | null;
 }
 
 interface AuthContextType {
@@ -16,55 +17,97 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  updateProfile: (name: string, number: string, address: string) => Promise<{ success: boolean; error?: string }>;
 }
-
-const defaultMockUser: User = {
-  id: "dummy-admin-id",
-  email: "admin@example.com",
-  name: "Admin User",
-  role: "Admin",
-  number: "9876543210",
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Start with mock user directly so they are logged in by default
-  const [user, setUser] = useState<User | null>(defaultMockUser);
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            setUser(data.user);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch session", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    checkSession();
+  }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    // Simulate short loading to mimic API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    
-    const mockUser: User = {
-      id: "dummy-admin-id",
-      email: email || "admin@example.com",
-      name: email.split("@")[0] || "Admin User",
-      role: "Admin",
-      number: "9876543210",
-    };
-    
-    setUser(mockUser);
-    setIsLoading(false);
-    router.push("/dashboard");
-    router.refresh();
-    return { success: true };
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUser(data.user);
+        router.push("/dashboard");
+        router.refresh();
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || "Invalid credentials" };
+      }
+    } catch (err) {
+      return { success: false, error: "Network error. Please try again." };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    setUser(null);
-    setIsLoading(false);
-    router.push("/login");
-    router.refresh();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      router.push("/login");
+      router.refresh();
+    } catch (err) {
+      console.error("Logout failed", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateProfile = async (name: string, number: string, address: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/update-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, number, address }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUser(data.user);
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || "Failed to update profile" };
+      }
+    } catch (err) {
+      return { success: false, error: "Network error. Please try again." };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { signJWT } from "@/lib/jwt";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,18 +21,19 @@ export async function POST(request: NextRequest) {
 
     // Auto-create a default admin user on the fly if it doesn't exist yet, for easy testing
     if (!user && email.toLowerCase() === "admin@example.com") {
+      const hashedPassword = await bcrypt.hash(password, 10);
       user = await prisma.user.create({
         data: {
           email: "admin@example.com",
           name: "Admin User",
           number: "1234567890",
           role: "Admin",
-          password: password, // For mock setup we store it as provided
+          password: hashedPassword,
         },
       });
     }
 
-    if (!user || user.password !== password) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return NextResponse.json(
         { success: false, error: "Invalid email or password" },
         { status: 401 }
@@ -44,7 +47,10 @@ export async function POST(request: NextRequest) {
       name: user.name,
       role: user.role,
       number: user.number,
+      address: user.address,
     };
+
+    const token = await signJWT(sessionData);
 
     // Serialize session and set HttpOnly cookie
     const response = NextResponse.json({
@@ -54,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set({
       name: "session",
-      value: JSON.stringify(sessionData),
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
