@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Hari Naman Greens - Fresh Organic Vegetables Delivery",
   description: "Order fresh, organic, and handpicked vegetables online from Hari Naman Greens. Get premium quality produce delivered straight to your home.",
-};
+};  
 
 export default function RootLayout({
   children,
